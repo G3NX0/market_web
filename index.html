@@ -2730,12 +2730,13 @@ function cetakHPP() {
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#2c1f0e;padding:40px;font-size:12px;max-width:850px;margin:0 auto;line-height:1.5}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#2c1f0e;padding:40px;font-size:12px;max-width:850px;margin:0 auto;line-height:1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   
   /* Decorative background */
   body::before {
     content: ''; position: fixed; top: 0; left: 0; right: 0; height: 6px;
-    background: linear-gradient(90deg, #c8860a, #f0c040, #c8860a); z-index: 100;
+    background: linear-gradient(90deg, #c8860a, #f0c040, #c8860a) !important; z-index: 100;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
 
   header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #f2ebe0; padding-bottom: 20px; }
@@ -2778,10 +2779,10 @@ function cetakHPP() {
   .res-card.green .res-val { color: #1a5c35; }
   .res-sub { font-size: 10px; color: #998070; margin-top: 4px; font-weight: 600; }
 
-  .summary-bar { background: #2c1f0e; color: white; border-radius: 16px; padding: 25px; margin-top: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 20px rgba(44,31,14,0.15); }
+  .summary-bar { background: #2c1f0e !important; color: white !important; border-radius: 16px; padding: 25px; margin-top: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 20px rgba(44,31,14,0.15); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sum-item { text-align: center; }
-  .sum-lbl { font-size: 10px; opacity: 0.6; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
-  .sum-val { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+  .sum-lbl { font-size: 10px; opacity: 0.6; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; color: white !important; }
+  .sum-val { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: white !important; }
 
   footer{text-align:center;color:#998070;font-size:10px;margin-top:40px; padding-top:20px; border-top: 1px solid #f2ebe0; font-weight: 600; }
   
