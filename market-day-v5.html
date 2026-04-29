@@ -1381,9 +1381,9 @@ td.num { font-weight: 700; color: var(--gold); font-size: 11px; }
         </div>
       </div>
       <div class="field">
-        <label>Anggota <span style="font-weight:400;text-transform:none;font-size:10px">(pisah dengan koma)</span></label>
-        <input type="text" id="anggota" placeholder="Ani, Budi, Cici, Dedi">
-        <div class="field-hint">Dipakai untuk menghitung laba per anggota.</div>
+        <label>Anggota <span style="font-weight:400;text-transform:none;font-size:10px">(nama pisah koma ATAU jumlah angka)</span></label>
+        <input type="text" id="anggota" placeholder="cth: 5 atau Ani, Budi, Cici" oninput="hitungLaporan()">
+        <div class="field-hint">Contoh: Ketik <strong>5</strong> jika ada 5 orang, atau ketik nama-namanya.</div>
       </div>
     </div>
   </div>
@@ -2454,12 +2454,20 @@ function hitungLaporan() {
   }
 
   // Laba anggota
-  const anggotaStr = document.getElementById('anggota').value.trim();
-  const anggotaList = anggotaStr ? anggotaStr.split(',').map(x=>x.trim()).filter(Boolean) : [];
+  const anggotaRaw = document.getElementById('anggota').value.trim();
+  let nAnggota = 0;
+  if (anggotaRaw) {
+    if (!isNaN(anggotaRaw)) {
+      nAnggota = parseInt(anggotaRaw);
+    } else {
+      nAnggota = anggotaRaw.split(',').map(x=>x.trim()).filter(Boolean).length;
+    }
+  }
+
   const labaBox = document.getElementById('labaBox');
-  if (anggotaList.length > 0 && netProfit > 0) {
+  if (nAnggota > 0 && netProfit > 0) {
     labaBox.style.display = '';
-    document.getElementById('labaText').textContent = `${fmt(netProfit / anggotaList.length)} per orang (${anggotaList.length} anggota)`;
+    document.getElementById('labaText').textContent = `${fmt(netProfit / nAnggota)} per orang (${nAnggota} anggota)`;
   } else {
     labaBox.style.display = 'none';
   }
@@ -2722,60 +2730,153 @@ function cetakHPP() {
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#2c1f0e;padding:28px 32px;font-size:12px;max-width:820px;margin:0 auto}
-  h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:#2c1f0e;margin-bottom:3px}
-  .sub{color:#998070;font-size:11px;margin-bottom:20px}
-  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:18px;padding:12px 14px;background:#f9f4ed;border-radius:8px;border:1px solid #e0d5c5}
-  .info-row{display:flex;gap:8px;align-items:baseline}
-  .info-k{font-weight:700;color:#998070;min-width:80px;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
-  table{width:100%;border-collapse:collapse;margin-bottom:14px}
-  th{background:#2c1f0e;color:white;padding:7px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-  td{padding:7px 10px;border-bottom:1px solid #e0d5c5}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#2c1f0e;padding:40px;font-size:12px;max-width:850px;margin:0 auto;line-height:1.5}
+  
+  /* Decorative background */
+  body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #c8860a, #f0c040, #c8860a); z-index: 100;
+  }
+
+  header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #f2ebe0; padding-bottom: 20px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { font-size: 32px; background: #f9f4ed; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid #e0d5c5; }
+  .brand-text h1 { font-family:'Playfair Display',serif; font-size: 24px; font-weight: 900; color: #2c1f0e; line-height: 1.2; }
+  .brand-text p { color: #998070; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+
+  .meta-info { text-align: right; }
+  .meta-date { font-weight: 700; color: #2c1f0e; font-size: 13px; }
+  .meta-id { color: #998070; font-size: 10px; margin-top: 4px; }
+
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:30px}
+  .info-card { background:#f9f4ed; padding:15px 20px; border-radius:12px; border:1px solid #e0d5c5; display: flex; flex-direction: column; gap: 4px; }
+  .info-label { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#998070; }
+  .info-value { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:#2c1f0e; }
+
+  .section-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c8860a;margin:25px 0 10px; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: #e0d5c5; }
+
+  table{width:100%;border-collapse:separate; border-spacing: 0; margin-bottom:20px; border: 1px solid #e0d5c5; border-radius: 12px; overflow: hidden; }
+  th{background:#2c1f0e;color:white;padding:12px 15px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  td{padding:12px 15px;border-bottom:1px solid #f2ebe0; background: #fff; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #fafafa; }
   .r{text-align:right}
   .bold{font-weight:700;color:#c8860a}
-  .tfoot-row td{background:#f2ebe0;font-weight:700;font-size:13px;border-top:2px solid #2c1f0e}
-  .section-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#998070;margin:14px 0 6px}
-  .result-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
-  .res-box{background:#f2ebe0;border-radius:10px;padding:14px 12px;text-align:center}
-  .res-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#998070;margin-bottom:5px}
-  .res-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#2c1f0e}
-  .res-val.gold{color:#c8860a}
-  .res-val.green{color:#1a5c35}
-  .summary-bar{background:#2c1f0e;color:white;border-radius:10px;padding:12px 16px;margin-top:14px;display:flex;justify-content:space-between;align-items:center}
-  .sum-item{text-align:center}
-  .sum-lbl{font-size:9px;opacity:.6;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
-  .sum-val{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-top:2px}
-  footer{text-align:center;color:#ccc;font-size:10px;margin-top:24px;border-top:1px solid #e0d5c5;padding-top:12px}
-  @media print{body{padding:16px}@page{margin:10mm}}
+
+  .tfoot-row td{background:#f9f4ed !important; font-weight:800; font-size:14px; color: #2c1f0e; border-top: 2px solid #e0d5c5; }
+  
+  .results-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+  .res-card { background: #fff; border: 1px solid #e0d5c5; padding: 20px; border-radius: 16px; text-align: center; position: relative; overflow: hidden; }
+  .res-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #e0d5c5; }
+  .res-card.gold::before { background: #c8860a; }
+  .res-card.green::before { background: #1a5c35; }
+  
+  .res-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #998070; margin-bottom: 8px; }
+  .res-val { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: #2c1f0e; }
+  .res-card.gold .res-val { color: #c8860a; }
+  .res-card.green .res-val { color: #1a5c35; }
+  .res-sub { font-size: 10px; color: #998070; margin-top: 4px; font-weight: 600; }
+
+  .summary-bar { background: #2c1f0e; color: white; border-radius: 16px; padding: 25px; margin-top: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 20px rgba(44,31,14,0.15); }
+  .sum-item { text-align: center; }
+  .sum-lbl { font-size: 10px; opacity: 0.6; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+  .sum-val { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+
+  footer{text-align:center;color:#998070;font-size:10px;margin-top:40px; padding-top:20px; border-top: 1px solid #f2ebe0; font-weight: 600; }
+  
+  @media print {
+    body { padding: 0; }
+    .summary-bar { box-shadow: none; border: 1px solid #2c1f0e; }
+    @page { margin: 1.5cm; }
+  }
 </style></head><body>
-<h1>🧮 Kalkulator HPP — Market Day</h1>
-<p class="sub">Dicetak: ${tgl}</p>
-<div class="info-grid">
-  <div class="info-row"><span class="info-k">Kelompok</span><span>${kel}</span></div>
-  <div class="info-row"><span class="info-k">Kelas</span><span>${kls}</span></div>
-</div>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📊</div>
+      <div class="brand-text">
+        <h1>Market Day Calculator</h1>
+        <p>Professional HPP & Pricing Report</p>
+      </div>
+    </div>
+    <div class="meta-info">
+      <div class="meta-date">${tgl}</div>
+      <div class="meta-id">Generated by Antigravity AI</div>
+    </div>
+  </header>
 
-<div class="section-label">🌾 Daftar Bahan & Biaya Produksi</div>
-<table>
-  <thead><tr><th>#</th><th>Nama Bahan</th><th>Jml Beli</th><th>Dipakai</th><th class="r">Harga Beli</th><th class="r">Biaya</th></tr></thead>
-  <tbody>${bahanRows}</tbody>
-  ${alatRows ? `<tbody><tr><td colspan="6" style="background:#f9f4ed;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#998070;padding:6px 10px">🔧 Biaya Alat &amp; Peralatan</td></tr>${alatRows}</tbody>` : ''}
-  <tfoot><tr class="tfoot-row"><td colspan="5">Total Modal Produksi</td><td class="r">${fmt(totalModal)}</td></tr></tfoot>
-</table>
+  <div class="info-grid">
+    <div class="info-card">
+      <span class="info-label">Kelompok / Nama Bisnis</span>
+      <span class="info-value">${kel}</span>
+    </div>
+    <div class="info-card">
+      <span class="info-label">Kelas / Kategori</span>
+      <span class="info-value">${kls}</span>
+    </div>
+  </div>
 
-<div class="section-label">🎯 Hasil HPP</div>
-<div class="result-grid">
-  <div class="res-box"><div class="res-lbl">HPP / Item</div><div class="res-val">${fmt(hpp)}</div></div>
-  <div class="res-box"><div class="res-lbl">Harga Jual</div><div class="res-val gold">${fmt(hj)}</div><div style="font-size:10px;color:#998070;margin-top:3px">margin ${pct}%</div></div>
-  <div class="res-box"><div class="res-lbl">Untung / Item</div><div class="res-val green">${fmt(unt)}</div></div>
-</div>
-<div class="summary-bar">
-  <div class="sum-item"><div class="sum-lbl">Total Modal</div><div class="sum-val">${fmt(totalModal)}</div></div>
-  <div class="sum-item"><div class="sum-lbl">Produk Jadi</div><div class="sum-val">${jadi > 0 ? jadi+' item' : '—'}</div></div>
-  <div class="sum-item"><div class="sum-lbl">Total Untung*</div><div class="sum-val" style="color:#4ade80">${jadi > 0 ? fmt(unt*jadi) : '—'}</div></div>
-</div>
-<p style="font-size:10px;color:#999;margin-top:6px">*Jika semua produk terjual</p>
-<footer>Dibuat dengan Kalkulator Market Day &mdash; Market Day HPP Calculator</footer>
+  <div class="section-label">🌾 Rincian Biaya Produksi</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 40px">#</th>
+        <th>Bahan / Deskripsi</th>
+        <th>Kuantitas Beli</th>
+        <th>Kuantitas Pakai</th>
+        <th class="r">Harga Satuan</th>
+        <th class="r">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${bahanRows}
+      ${alatRows ? `<tr><td colspan="6" style="background:#f9f4ed; font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#c8860a; padding:10px 15px">🔧 Biaya Alat & Peralatan</td></tr>${alatRows}` : ''}
+    </tbody>
+    <tfoot>
+      <tr class="tfoot-row">
+        <td colspan="5">Total Modal Produksi</td>
+        <td class="r">${fmt(totalModal)}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="section-label">🎯 Analisis Harga Jual & Keuntungan</div>
+  <div class="results-container">
+    <div class="res-card">
+      <div class="res-lbl">HPP / Item</div>
+      <div class="res-val">${fmt(hpp)}</div>
+      <div class="res-sub">Modal dasar per porsi</div>
+    </div>
+    <div class="res-card gold">
+      <div class="res-lbl">Harga Jual</div>
+      <div class="res-val">${fmt(hj)}</div>
+      <div class="res-sub">Target Margin ${pct}%</div>
+    </div>
+    <div class="res-card green">
+      <div class="res-lbl">Untung / Item</div>
+      <div class="res-val">${fmt(unt)}</div>
+      <div class="res-sub">Profit per porsi</div>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="sum-item">
+      <div class="sum-lbl">Total Modal</div>
+      <div class="sum-val">${fmt(totalModal)}</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-lbl">Produk Jadi</div>
+      <div class="sum-val">${jadi > 0 ? jadi + ' porsi' : '—'}</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-lbl">Potensi Untung</div>
+      <div class="sum-val" style="color:#f0c040">${jadi > 0 ? fmt(unt * jadi) : '—'}</div>
+    </div>
+  </div>
+
+  <footer>
+    Market Day HPP Calculator &bull; Membantu UMKM Pelajar menghitung dengan akurat &bull; 2024
+  </footer>
 </body></html>`;
 
   const w = window.open('','_blank','width=860,height=700');
